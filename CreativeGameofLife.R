@@ -71,7 +71,7 @@ for(i in 1:tt){
   pop <- d_eu + d_ed + d_le + d_re + d_lu + d_ru + d_ld + d_rd
   
   
-  if(i > 14){if(abs(mean(u[(i-1):(i-3)])-mean(u[(i-10):(i-12)])) < 0.01*ll*ww){
+  if(i > 14){if(abs(mean(u[(i-1):(i-3)])-mean(u[(i-10):(i-12)])) > 0.005*ll*ww){
     d=foo(x,d,pop); cols = "blue" }else{x=sample(seq(1,11),1);d = foo(x,d,pop); cols= "red"}
   }else{d=foo(x,d,pop); cols = "blue"}
   
