@@ -18,7 +18,7 @@ import os
 os.chdir(r'C:\Users\Lenovo\Demo\gameoflifeImages')
 
 dimensions = 3 # n dimensional spzce >=2
-size = 12
+size = 10
 a = [range(size)]*dimensions
 coordlist = list(itertools.product(*a))
 offsets = [[-1,0,1]]*dimensions
@@ -43,7 +43,7 @@ for cube in cubelist:
 
 
 # start a forloop that captures each timestep in the game of life
-timesteps = 15
+timesteps = 30
 
 for timestep in range(timesteps):    
     
@@ -92,6 +92,9 @@ for timestep in range(timesteps):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     ax.scatter(x_coords, y_coords, z_coords, c = 'blue')
+    ax.set_xlim3d(0,size)
+    ax.set_ylim3d(0,size)
+    ax.set_zlim3d(0,size)
     #plt.show()
     plt.savefig('myplt' + str(timestep) + '.png', bbox_inches="tight", pad_inches = 0)
     plt.close()
@@ -102,5 +105,5 @@ os.system(r'cmd /c "ffmpeg -i myplt%d.png -vf palettegen palette.jpg" ')
 
 os.system(r'cmd /c "ffmpeg -framerate 10 -i C:\Users\Lenovo\Demo\gameoflifeImages\myplt%d.png -i palette.jpg -lavfi paletteuse C:\Users\Lenovo\Demo\gameoflifeImages\output.gif"')
 
-# delete png files
+# delete png files 
 [os.remove(file) for file in os.listdir(r'C:\Users\Lenovo\Demo\gameoflifeImages') if file.endswith('.png')]
