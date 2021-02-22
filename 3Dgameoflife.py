@@ -14,11 +14,12 @@ import random
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
 import os
+from matplotlib.gridspec import GridSpec
 
 os.chdir(r'C:\Users\Lenovo\Demo\gameoflifeImages')
 
 dimensions = 3 # n dimensional spzce >=2
-size = 10
+size = 9
 a = [range(size)]*dimensions
 coordlist = list(itertools.product(*a))
 offsets = [[-1,0,1]]*dimensions
@@ -42,8 +43,11 @@ for cube in cubelist:
     hypercube.append(offset_points)
 
 
+# have a population count time series to plot in the bottom subplot
+poplist = []
+
 # start a forloop that captures each timestep in the game of life
-timesteps = 30
+timesteps = 40
 
 for timestep in range(timesteps):    
     
@@ -74,8 +78,9 @@ for timestep in range(timesteps):
     
 
     plotcoords = []
+    #apply the game of life rule here
     for coord in range(len(coordlist)):
-        if  (list(coorddict.values())[coord] == 1 and pointpops[coord] in [5,6,7]) or pointpops[coord] in [5,7]: # survival / generation /death rule here
+        if (list(coorddict.values())[coord] == 1 and pointpops[coord] in [5,6,7]) or pointpops[coord] in [5,7]: # survival / generation /death rule here
             plotcoords.append(coordlist[coord])
             # repopulate coorddict values
             coorddict[list(coorddict)[coord]] = 1
@@ -89,13 +94,24 @@ for timestep in range(timesteps):
         y_coords.append(y)
         z_coords.append(z)
     
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-    ax.scatter(x_coords, y_coords, z_coords, c = 'blue')
-    ax.set_xlim3d(0,size)
-    ax.set_ylim3d(0,size)
-    ax.set_zlim3d(0,size)
+    poplist.append(sum(coorddict.values()))
+
+    
+    fig = plt.figure(figsize = (12,10))
+    gs = GridSpec(5,1)
+    ax0 = fig.add_subplot(gs[0:3,0], projection = '3d')
+    ax0.scatter(x_coords, y_coords, z_coords, c = 'blue')
+    ax0.set_xlim3d(0,size)
+    ax0.set_ylim3d(0,size)
+    ax0.set_zlim3d(0,size)
     #plt.show()
+    ax1 = fig.add_subplot(gs[4,0])
+    ax1.plot(poplist)
+    #plt.yscale('log')
+    plt.xlim([0.1, timesteps + 1])
+    plt.ylim([0.1, size ** dimensions])
+    plt.ylabel("Population")
+    plt.xlabel("Timestep")
     plt.savefig('myplt' + str(timestep) + '.png', bbox_inches="tight", pad_inches = 0)
     plt.close()
 
