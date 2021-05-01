@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sat Feb 20 19:03:23 2021
+
 @author: Lenovo
 """
 # This approach to 3D game of life relies on dictionaries
@@ -8,17 +9,23 @@ Created on Sat Feb 20 19:03:23 2021
 # so the populations are summed across the indices for each offset
 # from a coordinate, giving the neighbor populations
 
+import statistics
 import itertools
 import random
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
 import os
 from matplotlib.gridspec import GridSpec
+from itertools import combinations
+import time
+import numpy as np
+from sklearn.cluster import KMeans
+import pandas as pd
 
 os.chdir(r'C:\Users\Lenovo\Demo\gameoflifeImages')
 
-dimensions = 3 # n dimensional spzce >=2
-size = 9
+dimensions = 3 # n dimensional space >=2
+size = 18
 a = [range(size)]*dimensions
 coordlist = list(itertools.product(*a))
 offsets = [[-1,0,1]]*dimensions
@@ -27,7 +34,7 @@ cubelist = list(itertools.product(*offsets))
 # populate the space with 1's and 0's
 coorddict = {}
 for point in coordlist:
-    coorddict[point] = random.randint(0,1)
+    coorddict[point] = [1,0,0][random.randint(0,2)]
 
 # make a list of the different cubes or n-dimensional spaces
 # by offsetting the points in thecoordlist by each variation of the cubelist
@@ -46,7 +53,7 @@ for cube in cubelist:
 poplist = []
 
 # start a forloop that captures each timestep in the game of life
-timesteps = 40
+timesteps = 35
 
 for timestep in range(timesteps):    
     
@@ -79,27 +86,48 @@ for timestep in range(timesteps):
     plotcoords = []
     #apply the game of life rule here
     for coord in range(len(coordlist)):
-        if (list(coorddict.values())[coord] == 1 and pointpops[coord] in [5,6,7]) or pointpops[coord] in [5,7]: # survival / generation /death rule here
+        
+        if (list(coorddict.values())[coord] == 1 and pointpops[coord] in [3,8]) or pointpops[coord] in [5]: # survival / generation /death rule here
+            plotcoords.append(coordlist[coord])
+            # repopulate coorddict values
+            coorddict[list(coorddict)[coord]] = 1
+        if coordlist[coord] in list(itertools.product(*[range(5,9)]*3)) and (list(coorddict.values())[coord] == 1 and pointpops[coord] in [5,8]) or pointpops[coord] in [5,9]: # survival / generation /death rule here
             plotcoords.append(coordlist[coord])
             # repopulate coorddict values
             coorddict[list(coorddict)[coord]] = 1
         else: coorddict[list(coorddict)[coord]] = 0
     
+    poplist.append(sum(coorddict.values()))
+    
     x_coords = []
     y_coords = []
     z_coords = []
+    
     for x,y,z in plotcoords:
         x_coords.append(x)
         y_coords.append(y)
         z_coords.append(z)
     
-    poplist.append(sum(coorddict.values()))
-
+    model = KMeans(n_clusters = 3)
+    model.fit(pd.DataFrame({'x' : x_coords, 'y' : y_coords, 'z' : z_coords}))
+    labels = model.predict(pd.DataFrame({'x' : x_coords, 'y' : y_coords, 'z' : z_coords}))
+    centroids  = model.cluster_centers_
+    
+    cx = []
+    cy = []
+    cz = []
+    
+    for x,y,z in centroids:
+        cx.append(x)
+        cy.append(y)
+        cz.append(z)
+        
     
     fig = plt.figure(figsize = (12,10))
     gs = GridSpec(5,1)
     ax0 = fig.add_subplot(gs[0:3,0], projection = '3d')
-    ax0.scatter(x_coords, y_coords, z_coords, c = 'blue')
+    ax0.scatter(x_coords, y_coords, z_coords)
+    ax0.scatter(cx, cy, cz, s = 60, c = 'magenta', marker = 's')
     ax0.set_xlim3d(0,size)
     ax0.set_ylim3d(0,size)
     ax0.set_zlim3d(0,size)
@@ -118,7 +146,7 @@ for timestep in range(timesteps):
     
 os.system(r'cmd /c "ffmpeg -i myplt%d.png -vf palettegen palette.jpg" ')
 
-os.system(r'cmd /c "ffmpeg -framerate 10 -i C:\Users\Lenovo\Demo\gameoflifeImages\myplt%d.png -i palette.jpg -lavfi paletteuse C:\Users\Lenovo\Demo\gameoflifeImages\output.gif"')
+os.system(r'cmd /c "ffmpeg -framerate 8 -i C:\Users\Lenovo\Demo\gameoflifeImages\myplt%d.png -i palette.jpg -lavfi paletteuse C:\Users\Lenovo\Demo\gameoflifeImages\output.gif"')
 
 # delete png files 
 [os.remove(file) for file in os.listdir(r'C:\Users\Lenovo\Demo\gameoflifeImages') if file.endswith('.png')]
