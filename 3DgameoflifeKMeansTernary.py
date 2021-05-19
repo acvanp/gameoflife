@@ -38,7 +38,7 @@ from tqdm import tqdm
 # populate the space with 1's and 0's
 coorddict = {}
 for point in coordlist:
-    coorddict[point] = [1,0,0,0][rn.randint(0,3)]
+    coorddict[point] = [1,3,0,0,0][rn.randint(0,3)]
 
 # make a list of the different cubes or n-dimensional spaces
 # by offsetting the points in thecoordlist by each variation of the cubelist
@@ -57,7 +57,7 @@ for cube in cubelist:
 poplist = []
 
 # start a forloop that captures each timestep in the game of life
-timesteps = 22
+timesteps = 34
 
 for timestep in tqdm(range(timesteps)):    
     
@@ -91,17 +91,16 @@ for timestep in tqdm(range(timesteps)):
     #apply the game of life rule here
     for coord in range(len(coordlist)):
 
-        if (list(coorddict.values())[coord] == 2 and pointpops[coord] in [5,7,9]) or pointpops[coord] in [5,7]: # survival / generation /death rule here
+        if (list(coorddict.values())[coord] == 1 and pointpops[coord] in [2,4]) or pointpops[coord] in [5,7]: # survival / generation /death rule here
             plotcoords[1].append(coordlist[coord])
             # repopulate coorddict values
             coorddict[list(coorddict)[coord]] = 1
             
-        elif (list(coorddict.values())[coord] == 1 and pointpops[coord] in range(10, 11)) or pointpops[coord] > 16: # survival / generation /death rule here
+        elif (list(coorddict.values())[coord] == 3 and pointpops[coord] in range(16,22)) or pointpops[coord] in range(18,24): # survival / generation /death rule here
             plotcoords[2].append(coordlist[coord])
             # repopulate coorddict values
-            coorddict[list(coorddict)[coord]] = 2
+            coorddict[list(coorddict)[coord]] = 3
             
-        
         else: coorddict[list(coorddict)[coord]] = 0
     
     poplist.append(sum(coorddict.values()))
